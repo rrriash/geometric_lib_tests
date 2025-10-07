@@ -1,0 +1,30 @@
+name: CI
+on:
+  push
+
+jobs:
+  tests:
+    name: pytest on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install deps (if any)
+        if: hashFiles('requirements.txt') != ''
+        run: python -m pip install -r requirements.txt
+      - name: Install pytest
+        run: python -m pip install pytest
+      - name: Run tests
+        run: pytest -q
