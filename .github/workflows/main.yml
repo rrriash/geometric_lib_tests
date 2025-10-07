@@ -11,25 +11,42 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
-            submodules: recursive
+          submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'   # можно 3.10/3.12, не критично
+          python-version: '3.11'
 
-      - name: Show workspace (debug)
+      - name: Show env (debug)
+        shell: bash
         run: |
-          pwd
+          python -V
+          echo "PYTHONPATH=$PYTHONPATH"
+          echo "Workspace: $GITHUB_WORKSPACE"
           ls -la
-          echo "---- tests dir ----"
+          echo "---- tests ----"
           ls -la tests || true
-
-      # зависимостей нет — ничего не ставим
+          echo "---- geometric_lib ----"
+          ls -la geometric_lib || true
+          python - <<'PY'
+import sys, os, glob
+print("sys.path[0]:", sys.path[0])
+print("Found tests:", glob.glob("tests/test_*.py"))
+try:
+    import geometric_lib
+    print("geometric_lib loaded from:", getattr(geometric_lib, "__file__", "?"))
+except Exception as e:
+    print("IMPORT ERROR:", e)
+PY
 
       - name: Run unittest discovery
+        shell: bash
         run: python -m unittest discover -s tests -p "test_*.py" -v
