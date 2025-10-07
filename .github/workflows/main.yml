@@ -4,7 +4,7 @@ on:
 
 jobs:
   tests:
-    name: pytest on ${{ matrix.os }}
+    name: unit tests on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -15,42 +15,21 @@ jobs:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+            submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Upgrade pip
-        shell: bash
-        run: python -m pip install --upgrade pip
-
-      - name: Install deps (if any)
-        if: hashFiles('requirements.txt') != ''
-        shell: bash
-        run: python -m pip install -r requirements.txt
-
-      - name: Install pytest
-        shell: bash
-        run: python -m pip install pytest
+          python-version: '3.11'   # можно 3.10/3.12, не критично
 
       - name: Show workspace (debug)
-        shell: bash
         run: |
           pwd
           ls -la
-          echo "---- tests dir (if exists) ----"
+          echo "---- tests dir ----"
           ls -la tests || true
-          echo "---- test files ----"
-          find . -maxdepth 3 -type f -name "test_*.py" -print || true
 
-      - name: Run tests
-        shell: bash
-        run: |
-          if [ -d tests ]; then
-            pytest -q tests
-          else
-            pytest -q
-          fi
+      # зависимостей нет — ничего не ставим
+
+      - name: Run unittest discovery
+        run: python -m unittest discover -s tests -p "test_*.py" -v
