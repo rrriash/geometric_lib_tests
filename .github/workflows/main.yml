@@ -25,27 +25,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Show env (debug)
+      - name: Show workspace (brief)
         shell: bash
         run: |
           python -V
-          echo "PYTHONPATH=$PYTHONPATH"
-          echo "Workspace: $GITHUB_WORKSPACE"
+          pwd
           ls -la
           echo "---- tests ----"
           ls -la tests || true
           echo "---- geometric_lib ----"
           ls -la geometric_lib || true
-          python - <<'PY'
-import sys, os, glob
-print("sys.path[0]:", sys.path[0])
-print("Found tests:", glob.glob("tests/test_*.py"))
-try:
-    import geometric_lib
-    print("geometric_lib loaded from:", getattr(geometric_lib, "__file__", "?"))
-except Exception as e:
-    print("IMPORT ERROR:", e)
-PY
 
       - name: Run unittest discovery
         shell: bash
